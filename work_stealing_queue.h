@@ -15,9 +15,9 @@ public:
     work_stealing_queue()
     {}
 
-    work_stealing_queue(const work_stealing_queue& other)=delete;
+    work_stealing_queue(const work_stealing_queue& other) = delete;
     work_stealing_queue& operator=(
-            const work_stealing_queue& other)=delete;
+            const work_stealing_queue& other) = delete;
 
     void push(data_type data)
     {
@@ -34,12 +34,12 @@ public:
     bool try_pop(data_type& res)
     {
         std::lock_guard<std::mutex> lock(the_mutex);
-        if(the_queue.empty())
+        if (the_queue.empty())
         {
             return false;
         }
 
-        res=std::move(the_queue.front());
+        res = std::move(the_queue.front());
         the_queue.pop_front();
         return true;
     }
@@ -47,12 +47,12 @@ public:
     bool try_steal(data_type& res)
     {
         std::lock_guard<std::mutex> lock(the_mutex);
-        if(the_queue.empty())
+        if (the_queue.empty())
         {
             return false;
         }
 
-        res=std::move(the_queue.back());
+        res = std::move(the_queue.back());
         the_queue.pop_back();
         return true;
     }

@@ -15,10 +15,11 @@ private:
 public:
     threadsafe_queue()
     {}
+
     threadsafe_queue(threadsafe_queue const& other)
     {
         std::lock_guard<std::mutex> lk(other.mut);
-        data_queue=other.data_queue;
+        data_queue = other.data_queue;
     }
 
     void push(T new_value)
@@ -32,14 +33,14 @@ public:
     {
         std::unique_lock<std::mutex> lk(mut);
         data_cond.wait(lk,[this]{return !data_queue.empty();});
-        value=data_queue.front();
+        value = data_queue.front();
         data_queue.pop();
     }
 
     std::shared_ptr<T> wait_and_pop()
     {
         std::unique_lock<std::mutex> lk(mut);
-        data_cond.wait(lk,[this]{return !data_queue.empty();});
+        data_cond.wait(lk, [this]{return !data_queue.empty();});
         std::shared_ptr<T> res(std::make_shared<T>(data_queue.front()));
         data_queue.pop();
         return res;
@@ -48,9 +49,9 @@ public:
     bool try_pop(T& value)
     {
         std::lock_guard<std::mutex> lk(mut);
-        if(data_queue.empty())
+        if (data_queue.empty())
             return false;
-        value=std::move(data_queue.front());
+        value = std::move(data_queue.front());
         data_queue.pop();
         return true;
     }
@@ -58,7 +59,7 @@ public:
     std::shared_ptr<T> try_pop()
     {
         std::lock_guard<std::mutex> lk(mut);
-        if(data_queue.empty())
+        if (data_queue.empty())
             return std::shared_ptr<T>();
         std::shared_ptr<T> res(std::make_shared<T>(data_queue.front()));
         data_queue.pop();

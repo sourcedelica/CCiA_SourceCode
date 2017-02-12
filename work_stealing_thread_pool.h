@@ -13,7 +13,7 @@ class thread_pool
 
     std::atomic_bool done;
     threadsafe_queue<task_type> pool_work_queue;
-    std::vector<std::unique_ptr<work_stealing_queue> > queues;
+    std::vector<std::unique_ptr<work_stealing_queue>> queues;
     std::vector<std::thread> threads;
     join_threads joiner;
 
@@ -22,9 +22,9 @@ class thread_pool
 
     void worker_thread(unsigned my_index_)
     {
-        my_index=my_index_;
-        local_work_queue=queues[my_index].get();
-        while(!done)
+        my_index = my_index_;
+        local_work_queue = queues[my_index].get();
+        while (!done)
         {
             run_pending_task();
         }
@@ -42,10 +42,10 @@ class thread_pool
 
     bool pop_task_from_other_thread_queue(task_type& task)
     {
-        for(unsigned i=0;i<queues.size();++i)
+        for(unsigned i = 0; i < queues.size(); ++i)
         {
-            size_t const index=(my_index+i+1)%queues.size();
-            if(queues[index]->try_steal(task))
+            size_t const index = (my_index + i + 1) % queues.size();
+            if (queues[index]->try_steal(task))
             {
                 return true;
             }
@@ -56,34 +56,34 @@ class thread_pool
 
 public:
     thread_pool():
-            joiner(threads),done(false)
+            joiner(threads), done(false)
     {
-        unsigned const thread_count=std::thread::hardware_concurrency();
+        unsigned const thread_count = std::thread::hardware_concurrency();
 
         try
         {
-            for(unsigned i=0;i<thread_count;++i)
+            for(unsigned i = 0; i < thread_count; ++i)
             {
                 queues.push_back(std::unique_ptr<work_stealing_queue>(
                         new work_stealing_queue));
                 threads.push_back(
-                        std::thread(&thread_pool::worker_thread,this,i));
+                        std::thread(&thread_pool::worker_thread, this, i));
             }
         }
         catch(...)
         {
-            done=true;
+            done = true;
             throw;
         }
     }
 
     ~thread_pool()
     {
-        done=true;
+        done = true;
     }
 
     template<typename ResultType>
-    using task_handle=std::future<ResultType>;
+    using task_handle = std::future<ResultType>;
 
     template<typename FunctionType>
     task_handle<typename std::result_of<FunctionType()>::type> submit(
